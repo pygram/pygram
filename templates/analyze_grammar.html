@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="{% if automaton %}col-lg-3{% else %}col-lg-12{% endif %}">
+        <form method="POST" action="{{ url_for('analyze_grammar') }}">
+            <label for="type">Type</label>
+            <div clas="control-group">
+                {{ form.type(class_='form-control') }}
+            </div>
+            <div class="control-group">
+                <label for="terminals">Terminals</label>
+                {{ form.terminals(rows=3, class_='form-control', placeholder="Enter a space-separated terminal symbol list. A terminal symbol must contain only alphabetic characters.") }}
+                {% for error in form.terminals.errors %}
+                    <span class="text-danger">{{ error }}<br /></span>
+                {% endfor %}
+            </div>
+            <div class="control-group">
+                <label for="start">Start symbol</label>
+                {{ form.start(class_='form-control', placeholder="Optional") }}
+            </div>
+            <div class="control-group">
+                <label for="productions">Productions</label>
+                {{ form.productions(rows=10, class_='form-control', placeholder="Enter productions using YACC syntax.") }}
+                {% for error in form.productions.errors %}
+                    <span class="text-danger">{{ error }}<br /></span>
+                {% endfor %}
+            </div>
+            <div style="margin-top:10px;">
+            <button type="submit" class="btn btn-lg btn-primary">
+                Analyze
+            </button>
+            </div>
+        </form>
+    </div>
+    {% if automaton %}
+    <div class="col-lg-9">
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs">
+          <li class="active"><a href="#general" data-toggle="tab">General</a></li>
+          <li><a href="#state-graph" data-toggle="tab">State graph</a></li>
+          <li><a href="#table" data-toggle="tab">Table</a></li>
+          <li><a href="#simulation" data-toggle="tab">Parser simulator</a></li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content" style="padding-top:10px;">
+          <div class="tab-pane active" id="general">
+            <h4>Augmented grammar</h4>
+            <div class="well">
+            {% for num,production in automaton.augmented_grammar %}
+            {{num}}: {{ production|replace("<empty>", "ε")|replace("$end", "$") }} <br />
+            {% endfor %}
+            </div>
+            <h4>First sets</h4>
+            <div class="well">
+            {% for k,v in automaton.first.items() %}
+                FIRST({{ k }}) = { {{ v|join(', ')|replace("<empty>", "ε")|replace("$end", "$") }} }<br />
+            {% endfor %}
+            </div>
+            <h4>Follow sets</h4>
+            <div class="well">
+            {% for k,v in automaton.follow.items() %}
+                FOLLOW({{ k }}) = { {{ v|join(', ')|replace("<empty>", "ε")|replace("$end", "$") }} }<br />
+            {% endfor %}
+            </div>
+            {% if warnings %}
+                <h4>Warnings <span class="badge">{{ warnings|count }}</span></h4>
+                <div class="well">
+                {% for warning in warnings %}
+                    {{ warning|replace("<empty>", "ε")|replace("$end", "$") }}<br /> 
+                {% endfor %}
+                </div>
+            {% endif %}
+          </div>
+          <div class="tab-pane" id="state-graph">
+            <div id="state-graph-canvas" style="width:100%; height:auto; position:absolute;">
+                {{ automaton.to_svg()|safe }}
+            </div>
+          </div>
+          <div class="tab-pane" id="table" style="text-align:center;">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>State</th>
+                        <th colspan="{{ automaton.terminals|count }}" class="action">Action</th>
+                        <th colspan="{{ automaton.nonterminals|count }}" class="goto">Goto</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        {% for terminal in automaton.terminals %}
+                            <th class="action">{{ terminal|replace("$end","$") }}</th>
+                        {% endfor %}
+                        {% for nonterminal in automaton.nonterminals %}
+                            <th class="goto">{{ nonterminal }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead> 
+                <tbody>
+                {% for state in automaton.kernel_str.keys() %}
+                    <tr>
+                        <td>{{ state }}</td>
+                        {% for terminal in automaton.terminals %}
+                            <td>
+                            {% if terminal in automaton.action[state].keys() %}
+                                {% set n = automaton.action[state][terminal] %}
+                                {% if n >= 0 %}
+                                    {% if n == 0 %}
+                                        acc
+                                    {% else %}
+                                        s{{ n }}
+                                    {% endif %}
+                                {% else %}
+                                    r{{ n*-1 }}
+                                {% endif %}
+                            {% endif %}
+                            </td>
+                        {% endfor %}
+                        {% for nonterminal in automaton.nonterminals %}
+                            <td>
+                            {% if nonterminal in automaton.goto[state] %}
+                                {{ automaton.goto[state][nonterminal] }}
+                            {% endif %}
+                            </td> 
+                        {% endfor %}
+                    </tr>     
+                {% endfor %}
+                </tbody>
+            </table>
+          </div>
+          <div class="tab-pane" id="simulation">
+            <div class="form-inline">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Input string" />
+                </div>
+                <button class="btn btn-primary">Step</button>
+                <button class="btn btn-default">Restart</button>
+            </div>
+            <div class="well" style="margin-top:10px;">
+                This feature has not been implemented yet.
+            </div>
+          </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block extrajs %}
+{% if automaton %}
+<script type="text/javascript">
+    $(function(){
+        var svg = $("#state-graph-canvas").find('svg')[0];
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '100%');
+    });
+</script>
+{% endif %}
+{% endblock %}

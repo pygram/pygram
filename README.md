@@ -43,3 +43,7 @@ To-do
 =====
 * Add support for localization.
 * Add support for LL(1) and LR(1) parsers.
+
+License
+=======
+[MIT](http://opensource.org/licenses/MIT)

@@ -1,2 +1,2 @@
 git://github.com/heroku/heroku-buildpack-python
-git://github.com/peterkeen/heroku-buildpack-vendorbinaries
+git://github.com/gokceneraslan/heroku-buildpack-graphviz

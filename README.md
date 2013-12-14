@@ -3,9 +3,20 @@ pygram
 An open source grammar analyzer that uses [PLY](http://www.dabeaz.com/ply/) under the hood.
 Its purpose is to serve as an educational aid for undergraduate students taking an introductory course on compilers.
 
+Features
+========
+* SLR(1) and LALR(1) grammar support.
+* Augmented grammar.
+* First and follow sets.
+* Automaton state graph visualization.
+* Parsing table.
+* Parser simulator.
+
 Demo
 ====
 There is a demo hosted on a Heroku free instance: [http://pygram.herokuapp.com](http://pygram.herokuapp.com).
+
+![alt text](http://i.imgur.com/xmMg8oE.png "Preview")
 
 Installation
 ============

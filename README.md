@@ -21,6 +21,17 @@ There is a demo hosted on a Heroku free instance: [http://pygram.herokuapp.com](
 Installation
 ============
 
+Dependencies
+------------
+The following are the main dependencies used by pygram, for the complete list refer to 'requirements.txt'.
+
+* flask: [http://flask.pocoo.org/](http://flask.pocoo.org/).
+* graphviz: [http://www.graphviz.org/](http://www.graphviz.org/).
+* ply: [http://www.dabeaz.com/ply/](http://www.dabeaz.com/ply/).
+* pydot: [https://bitbucket.org/prologic/pydot/overview](https://bitbucket.org/prologic/pydot/overview).
+
+Note: pydot is included in the src folder 'pydot/'
+
 Ubuntu
 ------
 

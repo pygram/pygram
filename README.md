@@ -18,6 +18,24 @@ There is a demo hosted on a Heroku free instance: [http://pygram.herokuapp.com](
 
 ![alt text](http://i.imgur.com/xmMg8oE.png "Preview")
 
+Example
+------------
+
+**Terminals**
+
+    OPMULT OPDIV
+    OPADD OPSUB
+    FACTOR
+
+**Productions**
+
+    expr: expr OPADD term
+           | expr OPSUB term
+           | term;
+    term: term OPMULT FACTOR
+           | term OPDIV FACTOR
+           | FACTOR; 
+
 Installation
 ============
 
@@ -58,3 +76,4 @@ To-do
 License
 =======
 [MIT](http://opensource.org/licenses/MIT)
+

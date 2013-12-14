@@ -39,7 +39,7 @@ class LRAutomaton(object):
 
     def to_svg(self):
         '''
-         Uses PYDOT to create an SVG representation of the automaton.
+         Uses pydot to create an SVG representation of the automaton.
         '''
 
         graph = pydot.Dot(graph_type='digraph')
@@ -47,7 +47,7 @@ class LRAutomaton(object):
 
         nodes = {}
         for st,kernel in self.kernel_str.items():
-            nodes[st] = pydot.Node(name="{0}".format(st),label="State {0}\n{1}".format(st,kernel))
+            nodes[st] = pydot.Node(name="{0}".format(st),label="State {0}\n{1}".format(st,kernel.replace('$end','$')))
         
         nodes['acc'] = pydot.Node(name="acc",label="acc")
 
@@ -64,9 +64,10 @@ class LRAutomaton(object):
 
         for st,tran in self.goto.items():
             for sym,num in tran.items():
-                graph.add_edge(pydot.Edge(nodes[st],nodes[num],label=sym.replace('$end','$')))
+                graph.add_edge(pydot.Edge(nodes[st],nodes[num],label=sym))
 
         return re.sub(r'<\?xml.+\?>\s+<\!DOCTYPE[^>]+>','',graph.create_svg().decode('utf8'))
+
 def create_grammar(terminals,productions,start=None):
     '''
      Returns a PLY grammar object initialized
@@ -132,7 +133,7 @@ def create_automaton(terminals,productions,start=None,method='LALR'):
      extracted.
     '''
 
-    # We're using GrammarParser.mutex static variable in this context
+    # We're using the GrammarParser.mutex static variable in this context
     # because the analysis of the grammar is made by PLYs machinery,
     # so we need to protect ply.yacc state.
 

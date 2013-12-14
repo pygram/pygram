@@ -129,13 +129,25 @@
           <div class="tab-pane" id="simulation">
             <div class="form-inline">
                 <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Input string" />
+                    <input id="input_str" type="text" class="form-control" placeholder="Input string" />
                 </div>
-                <button class="btn btn-primary">Step</button>
-                <button class="btn btn-default">Restart</button>
+                <button id="start_btn" class="btn btn-default" onClick="start()">Start</button>
+                <button id="next_btn" class="btn btn-primary" onClick="next_step()" disabled="true">Next</button>
             </div>
-            <div class="well" style="margin-top:10px;">
-                This feature has not been implemented yet.
+            <div class="tab-pane" id="table" style="text-align:center; margin-top:20px;">
+                <table id="action_table" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th>Stack</th>
+                            <th>Symbols</th>
+                            <th>Input</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead> 
+                    <tbody>
+                    </tbody>
+                </table>
             </div>
           </div>
         </div>
@@ -146,10 +158,145 @@
 {% block extrajs %}
 {% if automaton %}
 <script type="text/javascript">
+
+    // Reference: Aho, Lam, Sethi, Ullman. Compilers: Principles, Techniques, & Tools. 2nd ed. pp.248-251
+
+    // Variables for simulation state.
+    var input = [];
+    var stack = [];
+    var symbols = [];
+    var line = 0;
+    var finished = true;
+
+    // Parsing tables.
+    var _goto = {
+        {% for st,goto in automaton.goto.items() %}
+            {{ st }} : { {% for sym,goto_st in goto.items() %} "{{sym}}" : {{goto_st}}, {% endfor %} },
+        {% endfor %}
+    };
+
+    var _action = {
+        {% for st,action in automaton.action.items() %}
+            {{ st }} : { {% for sym,num in action.items() %} "{{sym}}" : {{num}}, {% endfor %} },
+        {% endfor %}
+    };
+
+    var _grammar = {
+        {% for i,production in automaton.augmented_grammar %}
+            {{ i }} : "{{ production }}",
+        {% endfor %}
+    };
+
+    var _terminals = [{% for sym in automaton.terminals %} "{{ sym }}",{% endfor %}];
+
+    function start() {
+
+        $("#start_btn").text("Restart");
+        $("#next_btn").removeAttr("disabled");
+        $("#action_table > tbody").empty();
+
+        // Extract input symbols.
+        input_str = $.trim($("#input_str").val());
+
+        if(input_str.length > 0) {
+            input = input_str.split(" ");
+            input.push("$end");
+
+            // Check that input is correct.
+            var valid = true;
+            for (var i = 0; i < input.length; ++i) {
+                if(-1 == $.inArray(input[i],_terminals)) {
+                    alert("Invalid symbol: "+input[i]);
+                    valid = false;
+                    break;
+                }
+            }
+            // Initialize the stack.
+            if(valid) {
+                stack=[0]; 
+            }
+        }
+        else {
+            input = ["$end"];
+            stack = [0];
+        }
+        symbols = [];
+        line = 0;
+        finished = false;
+    }
+
+    function next_step() {
+
+        if(!finished && stack.length > 0 && input.length > 0) {
+            var s = stack[stack.length-1];
+            var a = input[0];
+            var n = _action[s][a];
+
+            if(n == undefined) {
+                alert("String not accepted!");
+                return;
+            } 
+
+            if(n >= 0) {
+                if(n > 0) {
+                    add_row("shift");
+                    // Shift!
+                    stack.push(n);
+                    symbols.push(input.shift());
+                }
+                else {
+                    // Accept!
+                    finished = true;
+                    add_row("accept");
+                }
+            }
+            else {
+                // Reduce!
+                var reduce_rule = _grammar[-n];
+                add_row("reduce by "+reduce_rule+"  ("+(-n)+")");
+
+                var prod = reduce_rule.split("-&gt;")
+                var head = $.trim(prod[0]);
+                var body = $.trim(prod[1]).replace(" ","-").replace("&lt;empty&gt;","");
+                var pops = 0;
+                if(body != "") {
+                    pops = body.split("-").length;
+                }
+
+                for(var i = 0; i < pops; i++) {
+                    stack.pop();
+                    symbols.pop();
+                }
+                symbols.push(head);
+                n = _goto[stack[stack.length-1]][head];
+                stack.push(n);
+            }
+        }
+        else {
+            alert("Finished!");
+        }
+    }
+
+    function add_row(action) {
+
+        var col1 = line;
+        var col2 = stack.join(" ");
+        var col3 = symbols.join(" ");
+        var col4 = input.join(" ").replace("$end","$");
+        var col5 = action.replace("&lt;empty&gt;","ε");
+        var row = "<tr><td>"+col1+"</td><td>"+col2+"</td><td>"+col3+"</td><td>"+col4+"</td><td>"+col5+"</td></tr>";
+        line = line+1;
+        $("#action_table > tbody").append(row); 
+    }
+
+    // This function has nothing to do with the parsing simulation.
+    // It adjusts the automaton graph size if it's too big.
     $(function(){
         var svg = $("#state-graph-canvas").find('svg')[0];
-        svg.setAttribute('width', '100%');
-        svg.setAttribute('height', '100%');
+        if(svg.getAttribute('width') > $("#state-graph-canvas").attr('width')) {
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%');
+        }
     });
 </script>
 {% endif %}

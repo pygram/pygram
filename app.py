@@ -5,20 +5,14 @@ from flask import request
 from flask import render_template
 from flask import flash
 
+from config import config
 from analyzer import create_automaton
 from parser import GrammarParser, GrammarSyntaxError, ServerTimeOut
 
 from forms import AnalyzeGrammarForm
 
-config = dict({
-        'DEBUG' : True,
-        'TESTING' : True,
-        'SECRET_KEY' : 'dkaghyt4se-5b5f-45j3-95rb-32342343252'
-})
-
 app = Flask(__name__)
 app.config.update(config)
-
 
 @app.route('/', methods=['POST', 'GET'])
 def analyze_grammar():

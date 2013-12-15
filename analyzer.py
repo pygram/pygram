@@ -16,6 +16,12 @@ class LRAutomaton(object):
          Takes an instance of PLYs LRGeneratedTable and builds an automaton.
         '''
         self.augmented_grammar = tuple(enumerate(str(p) for p in lr.grammar.Productions))
+        self.reduce_rules = []
+        for i,p in enumerate(lr.grammar.Productions):
+            rule = str(p)
+            rule = rule.split('->')
+            rule = (i,rule[0].rstrip(' ').lstrip(' '),sum(1 for r in rule[1].split(' ') if len(r) > 0 and "<empty>" != r))
+            self.reduce_rules.append(rule)
         self.kernel = lr.automaton_kernel
         self.kernel_str = {}
         for k,v in self.kernel.items():

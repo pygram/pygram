@@ -181,9 +181,9 @@
         {% endfor %}
     };
 
-    var _grammar = {
-        {% for i,production in automaton.augmented_grammar %}
-            {{ i }} : "{{ production }}",
+    var _reduce_rules = {
+        {% for i,head,pops in automaton.reduce_rules %}
+            {{ i }} : [ "{{head}}", {{pops}}],
         {% endfor %}
     };
 
@@ -252,17 +252,11 @@
             }
             else {
                 // Reduce!
-                var reduce_rule = _grammar[-n];
-                add_row("reduce by "+reduce_rule+"  ("+(-n)+")");
+                var reduce_rule = _reduce_rules[-n];
+                add_row("reduce by rule "+(-n)+".");
 
-                var prod = reduce_rule.split("-&gt;")
-                var head = $.trim(prod[0]);
-                var body = $.trim(prod[1]).replace(" ","-").replace("&lt;empty&gt;","");
-                var pops = 0;
-                if(body != "") {
-                    pops = body.split("-").length;
-                }
-
+                var head = reduce_rule[0];
+                var pops = reduce_rule[1];
                 for(var i = 0; i < pops; i++) {
                     stack.pop();
                     symbols.pop();

@@ -73,7 +73,12 @@ To-do
 * Add support for localization.
 * Add support for LL(1) and LR(1) parsers.
 
+Similar tools
+=============
+The following is a list of other grammar analyzers. Please, feel free to add more references to the list below.
+* [Anagra](http://webdiis.unizar.es/~ezpeleta/doku.php?id=material_de_apoyo)
+
 License
 =======
-[MIT](http://opensource.org/licenses/MIT)
-
+Pygram uses the [MIT](http://opensource.org/licenses/MIT) license.
+The dependencies used by Pygram are subject to their respective licenses.

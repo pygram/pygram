@@ -213,16 +213,17 @@
             }
             // Initialize the stack.
             if(valid) {
-                stack=[0]; 
+                stack=[0];
+                finished = false;
             }
         }
         else {
             input = ["$end"];
             stack = [0];
+            finished = false;
         }
         symbols = [];
         line = 0;
-        finished = false;
     }
 
     function next_step() {

@@ -9,7 +9,7 @@
             </div>
             <div class="control-group">
                 <label for="terminals">Terminals</label>
-                {{ form.terminals(rows=3, class_='form-control', placeholder="Enter a space-separated terminal symbol list. A terminal symbol must contain only alphabetic characters.") }}
+                {{ form.terminals(rows=3, class_='form-control', placeholder="Enter a space-separated terminal symbol list. A terminal symbol must contain only alphanumeric characters.") }}
                 {% for error in form.terminals.errors %}
                     <span class="text-danger">{{ error }}<br /></span>
                 {% endfor %}
